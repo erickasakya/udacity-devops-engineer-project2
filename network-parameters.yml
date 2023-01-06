@@ -1,0 +1,10 @@
+[
+    {
+        "ParameterKey":"EnvironmentName",
+        "ParameterValue":"UdagramProject"
+    },
+    {
+        "ParameterKey":"VpcCIDR",
+        "ParameterValue":"10.10.0.0/16"
+    }
+]
