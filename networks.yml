@@ -105,7 +105,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-        - Key: Name
+        - Key: Project
           Value: !Sub ${EnvironmentName} Public Route Table
   
   DefaultPublicRoute:
@@ -152,14 +152,14 @@ Resources:
     Properties:
       SubnetId: !Ref PublicSubnet2
       AllocationId: !GetAtt NatGateway2EIP.AllocationId
-      
+
 # Route table for Private subnet 1
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
-        - Key: Name
+        - Key: Project
           Value: !Sub ${EnvironmentName} Private Route Table 1
 
   DefaultPrivateRoute1:
@@ -181,7 +181,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       Tags:
-        - Key: Name
+        - Key: Project
           Value: !Sub ${EnvironmentName} Private Route Table 2
 
   DefaultPrivateRoute2:
