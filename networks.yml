@@ -19,5 +19,18 @@ Resources:
       CidrBlock: !Ref VpcCIDR
       EnableDnsHostnames: true
       Tags: 
-        - Key: Name
+        - Key: Project
           Value: !Ref EnvironmentName
+#Internet Gateway & attachment to VPC
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Project
+          Value: !Ref EnvironmentName
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
