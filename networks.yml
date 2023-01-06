@@ -10,6 +10,25 @@ Parameters:
     Type: String
     Default: 10.10.0.0/16
 
+  PublicSubnet1CIDR:
+    Description: Please enter the CIDR block for this subnet
+    Type: String
+    Default: 10.10.0.0/24
+
+  PublicSubnet2CIDR:
+    Description: Please enter the CIDR block for this subnet
+    Type: String
+    Default: 10.10.1.0/24
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the CIDR block for this subnet
+    Type: String
+    Default: 10.10.2.0/24
+
+  PrivateSubnet2CIDR:
+    Description: Please enter the CIDR block for this subnet
+    Type: String
+    Default: 10.10.3.0/24
 
 Resources:
 # VPC configurationn
@@ -34,3 +53,48 @@ Resources:
     Properties: 
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
+
+#Public Subnets 1 & 2
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Project 
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+  
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Project 
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+# Private Subnets 1 & 2
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Project
+          Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Project
+          Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
