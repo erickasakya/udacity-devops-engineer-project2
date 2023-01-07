@@ -107,7 +107,7 @@ Resources:
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
-          VolumeSize: !Ref EBSVolumeSizeS
+          VolumeSize: !Ref EBSVolumeSize
 # The auto scaling group responsible for creating EC2s/Instances
   WebServerGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
