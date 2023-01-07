@@ -17,3 +17,28 @@ Add more challenge to the project, once the project is completed, you can try de
 From the provided information, I have  a design an Architecture for Udagram using Lucid Chart as seen below. This architecture will be implementented in two categories i.e Network Infrastructure then Server Instances
 
 ![Udagram Architecture](UdagramArchitecture.jpeg)
+
+
+### Creating the Network Stack
+```
+cd udacity-devops-engineer-project2
+./create.sh udagram-Network networks.yml network-parameters.json aws-user-profile
+```
+
+### Updating the Network Stack
+```
+cd udacity-devops-engineer-project2
+./update.sh udagram-Network networks.yml network-parameters.json aws-user-profile
+```
+## The server stack is cross-referencing values from the Network stack e.g VPCID
+### Creating the Server Stack
+```
+cd udacity-devops-engineer-project2
+./create.sh udagram-Servers servers.yml server-parameters.json aws-user-profile
+```
+
+### Updating the Server Stack
+```
+cd udacity-devops-engineer-project2
+./update.sh udagram-Servers servers.yml server-parameters.json aws-user-profile
+```
