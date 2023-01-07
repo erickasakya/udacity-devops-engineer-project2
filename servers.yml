@@ -1,0 +1,179 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: A script that creates the Security Groups, Load balancer and Autoscaling group 
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed on every resources.
+    Type: String
+
+  EBSVolumeSize:
+    Description: The EBS volume size attached to an EC2 instance. 
+    Type: Number
+
+  MinEC2Servers:
+    Description: Please set the minimum number of server/ec2 instances
+    Type: Number
+    Default: 4
+
+  MaxEC2Servers:
+    Description: Please set the minimum number of server/ec2 instances
+    Type: Number
+    Default: 6
+
+Resources:
+# IAM Role to be used by EC2
+  EC2ReadOnlyS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: "/"
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - !Ref EC2ReadOnlyS3Role
+
+# Security Group for Load balancer
+  LoadBalancerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow http requests to the Load Balancer
+      VpcId: 
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+#Security group for the web servers
+  WebServerSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http & SSH requests to the Webservers
+      VpcId: 
+        Fn::ImportValue:
+          !Sub "${EnvironmentName}-VPCID"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+
+# The EC2 Lauch config to be used by autoscaaling group
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          sudo rm index.html
+          sudo aws s3 cp s3://udacity-demo-1/udacity.zip .
+          sudo unzip -o udacity.zip
+          systemctl start apache2.service
+      ImageId: ami-08fdec01f5df9998f
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      KeyName: udacity-key2
+      SecurityGroups:
+      - Ref: WebServerSecGroup
+      InstanceType: t3.medium
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sdk"
+        Ebs:
+          VolumeSize: !Ref EBSVolumeSizeS
+# The auto scaling group responsible for creating EC2s/Instances
+  WebServerGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MinSize: !Ref MinEC2Servers
+      MaxSize: !Ref MaxEC2Servers
+      VPCZoneIdentifier:
+        - Fn::ImportValue: 
+            !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName:
+        Ref: LaunchConfig
+      HealthCheckGracePeriod: 60
+      HealthCheckType: ELB
+      TargetGroupARNs:
+        - Ref: WebServerTargetGroup
+
+# The target group of webservers to be used by the loadbalancer
+  WebServerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: 
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-VPCID"
+# The load balancer for the webservers
+  WebServerLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - Fn::ImportValue: !Sub "${EnvironmentName}-PUB-NET1"
+        - Fn::ImportValue: !Sub "${EnvironmentName}-PUB-NET2"
+      SecurityGroups:
+        - Ref: LoadBalancerSecGroup
+# Load Balancer Listener
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: WebServerTargetGroup
+      LoadBalancerArn:
+        Ref: WebServerLoadBalancer
+      Port: '80'
+      Protocol: HTTP
+# The Listener Rule
+  ALBListenerRule:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+        Actions:
+        - Type: forward
+          TargetGroupArn: !Ref 'WebServerTargetGroup'
+        Conditions:
+        - Field: path-pattern
+          Values: [/]
+        ListenerArn: !Ref 'Listener'
+        Priority: 1
+
+Outputs: 
+    LoadBalancerDnsName: 
+        Description: The DNS name for the Load balancer to the web servers.
+        Value: !Sub "http://${WebServerLoadBalancer.DNSName}"
