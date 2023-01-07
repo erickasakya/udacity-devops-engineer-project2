@@ -5,6 +5,6 @@
     },
     {
         "ParameterKey":"EBSVolumeSize",
-        "ParameterValue": 10
+        "ParameterValue": "10"
     }
 ]
