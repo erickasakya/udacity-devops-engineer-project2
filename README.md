@@ -16,6 +16,8 @@ Add more challenge to the project, once the project is completed, you can try de
 
 From the provided information, I have  a design an Architecture for Udagram using Lucid Chart as seen below. This architecture will be implementented in two categories i.e Network Infrastructure then Server Instances
 
+To access the web app hosted click [here](http://udagr-webse-16d1geogl399k-898999464.us-east-1.elb.amazonaws.com/) 
+
 ![Udagram Architecture](UdagramArchitecture.jpeg)
 
 
