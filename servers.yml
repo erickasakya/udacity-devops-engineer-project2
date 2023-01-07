@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 
-Description: A script that creates the Security Groups, Load balancer and Autoscaling group 
+Description: Udacity DevOps Engineer Nano Degree Project 2/ Eric Kasakya.
+
+  EC2 Infrastructure
+  
+  A script that creates the IAM Role, Security Groups, Load balancer and Autoscaling group 
 
 Parameters:
   EnvironmentName:
@@ -101,7 +105,6 @@ Resources:
           systemctl start apache2.service
       ImageId: ami-08fdec01f5df9998f
       IamInstanceProfile: !Ref EC2InstanceProfile
-      KeyName: udacity-key2
       SecurityGroups:
       - Ref: WebServerSecGroup
       InstanceType: t3.medium

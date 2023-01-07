@@ -1,5 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 
+Description: Udacity DevOps Engineer Nano Degree Project 2/ Eric Kasakya.
+
+  Network Infrastructure
+
+  This Script is used to create Network infrastucture that is the VPC, The Subnets both Public & Private Internet Gateway, and Route tables.
+
 Parameters:
   EnvironmentName:
     Description: An environment name that will be prefixed on every resources.
