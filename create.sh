@@ -1,1 +1,1 @@
-aws cloudformation create-stack --stack-name $1 --template-body file://$2  --parameters file://$3 --profile "${4:-$udacity_user}" --region=us-east-1
+aws cloudformation create-stack --stack-name $1 --template-body file://$2  --parameters file://$3 --profile $4 --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM" --region=us-east-1
